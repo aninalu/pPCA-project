@@ -19,12 +19,12 @@ class PhylogenicCovarianceMatrices:
         tree = self.tree
 
         tree.add_property('level', shape=(1,))
-        tree.add_property('cum_sum_branch_length', shape=(1,))
+        tree.add_property('cum_sum_edge_length', shape=(1,))
         
         @jax.jit
-        def down(branch_length, parent_cum_sum_branch_length, parent_level, **args):
+        def down(edge_length, parent_cum_sum_edge_length, parent_level, **args):
             return {
-                'cum_sum_branch_length': branch_length + parent_cum_sum_branch_length,
+                'cum_sum_edge_length': edge_length + parent_cum_sum_edge_length,
                 'level': 1 + parent_level
             }
 
@@ -33,7 +33,7 @@ class PhylogenicCovarianceMatrices:
         exe.down(tree)
         
         self.levels = {node.id: tree.data['level'][node.id][0] for node in tree.iter_topology_bfs()}
-        self.cumulative_lengths = {node.id: tree.data['cum_sum_branch_length'][node.id][0] for node in tree.iter_topology_bfs()}
+        self.cumulative_lengths = {node.id: tree.data['cum_sum_edge_length'][node.id][0] for node in tree.iter_topology_bfs()}
 
     def _find_shared_branch_lengths(self, a: TopologyNode, b: TopologyNode) -> float:
         while self.levels[a.id] > self.levels[b.id]:
